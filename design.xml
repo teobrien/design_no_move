@@ -1,0 +1,63 @@
+<dock_design>
+     <SCOREFXNS>
+               <myscore weights=talaris2013_cst.wts/>
+     </SCOREFXNS>
+     <TASKOPERATIONS>
+               <DetectProteinLigandInterface name=edto design=1 cut1=6.0 cut2=8.0 cut3=12.0 cut4=14.0/>
+               <LimitAromaChi2 name=limchi2/>
+               <SetCatalyticResPackBehavior name=catres fix_catalytic_aa=0/>
+               <ProteinLigandInterfaceUpweighter name=up interface_weight=2/>
+     </TASKOPERATIONS>
+     <FILTERS>
+
+               <EnzScore name="allcst" score_type=cstE scorefxn=myscore whole_pose=1 energy_cutoff=2/>
+               <LigInterfaceEnergy name="interfE" scorefxn=myscore energy_cutoff=0/>
+
+     </FILTERS>
+
+     <MOVERS>
+
+             <AddOrRemoveMatchCsts name=cstadd cst_instruction=add_new/>
+             <FavorNativeResidue name=fnr bonus=2.5/>
+             <EnzRepackMinimize name=desmin_nobb design=1 repack_only=0 scorefxn_minimize=myscore scorefxn_repack=soft_rep minimize_rb=1 minimize_sc=1 minimize_bb=0 cycles=1 minimize_lig=1 min_in_stages=0 backrub=0 task_operations=edto,limchi2,catres,up/>
+             <EnzRepackMinimize name=repack_wbb design=0 repack_only=1 scorefxn_minimize=myscore scorefxn_repack=soft_rep minimize_rb=1 minimize_sc=1 minimize_bb=1 cycles=1 minimize_lig=1 min_in_stages=0 backrub=0 task_operations=edto,limchi2,catres,up/>
+             <EnzRepackMinimize name=repack_nobb design=0 repack_only=1 scorefxn_minimize=myscore scorefxn_repack=soft_rep minimize_rb=1 minimize_sc=1 minimize_bb=0 cycles=1 minimize_lig=1 min_in_stages=0 backrub=0 task_operations=edto,limchi2,catres,up/>
+             <PredesignPerturbMover name=predock trans_magnitude=0.1 rot_magnitude=1 dock_trials=500/>
+             <EnzRepackMinimize name=desmin_wbb design=1 repack_only=0 scorefxn_minimize=myscore scorefxn_repack=soft_rep minimize_rb=1 minimize_sc=1 minimize_bb=1 cycles=1 minimize_lig=1 min_in_stages=0 backrub=0 task_operations=edto,limchi2,catres,up/>
+             <EnzRepackMinimize name=cstopt cst_opt=1 minimize_rb=1 minimize_sc=1 minimize_bb=0 cycles=1 min_in_stages=0 minimize_lig=1/>
+             <ParsedProtocol name=dock_des>
+
+                Add mover=predock/>
+                <Add mover=cstopt/>
+                <Add mover=desmin_nobb/>
+
+             </ParsedProtocol>
+
+             ParsedProtocol name=dock_repack>
+
+                Add mover=predock/>
+                Add mover=cstopt/>
+                Add mover=repack_nobb/>
+
+             /ParsedProtocol>
+
+             <GenericMonteCarlo name=multi_dd mover_name=dock_des filter_name=interfE trials=10 sample_type=low temperature=0.6 drift=1/>
+             <GenericMonteCarlo name=repack_mc mover_name=dock_repack filter_name=interfE trials=10 sample_type=low temperature=0.6 drift=1/>
+       
+
+
+</MOVERS>
+
+<APPLY_TO_POSE>
+</APPLY_TO_POSE>
+
+<PROTOCOLS> 
+     <Add mover_name=cstadd/>
+     <Add mover_name=desmin_nobb/>
+     <Add mover_name=multi_dd/>
+     <Add mover_name=repack_mc/>
+     <Add filter_name=interfE/>
+</PROTOCOLS>
+
+</dock_design>
+

@@ -1,0 +1,27 @@
+<ROSETTASCRIPTS>
+     <SCOREFXNS>
+               <myscore weights=talaris2013.wts/>
+     </SCOREFXNS>
+     <TASKOPERATIONS>
+               <DetectProteinLigandInterface name=edto design=1 cut1=6.0 cut2=8.0 cut3=12.0 cut4=14.0/>
+               <LimitAromaChi2 name=limchi2/>
+	       <PreventResiduesFromRepacking name=lig_cl residues=677,678/>
+     </TASKOPERATIONS>
+
+<MOVERS>
+     <FastDesign name=fastneasy scorefxn=myscore task_operations=lig_cl,limchi2,edto clear_designable_residues=0 ramp_down_constraints=0>
+      <MoveMap>
+      <Jump number=1 setting=0/>
+      <Jump number=2 setting=0/>
+      </MoveMap>
+      </FastDesign>  
+
+     <GenericMonteCarlo name=gen_mc mover_name=fastneasy scorefxn_name=myscore trials=1 sample_type=low temperature=0.6 drift=1/>
+
+</MOVERS>
+      
+      <PROTOCOLS>
+              <Add mover_name=gen_mc/>
+      </PROTOCOLS>
+
+</ROSETTASCRIPTS>
